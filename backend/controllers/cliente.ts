@@ -1,4 +1,5 @@
 import  cliente  from "../models/cliente";
+import ruta from "../models/ruta";
 import { Request, Response } from "express";
 
 //crear un nuevo cliente
@@ -7,6 +8,12 @@ const createCliente =async (req: Request, res: Response) => {
       if (!req.body.nombres || !req.body.apellidos || !req.body.direccion ||  !req.body.sucursal_id) {
          return res.status(400).send({ error: 'Faltan datos obligatorios' });         
       }
+      //validar que la ruta exista
+        const rutaCliente = await ruta.getRutaById(req.body.id_ruta);
+        if (!rutaCliente) {
+            return res.status(400).send({ error: 'La ruta especificada no existe' });
+        }
+
         const nuevoCliente = await cliente.createCliente(req.body);
         if (!nuevoCliente) {
             
@@ -50,7 +57,7 @@ const getClientesBySucursal = async (req: Request, res: Response) => {
     try { 
         const sucursal_id = parseInt(req.params.sucursal_id);   
         const clientesEncontrado = await cliente.getClientesBySucursal(sucursal_id);
-          return clientesEncontrado===null
+          return clientesEncontrado.length===0
           ? res.status(404).send({ message: 'Cliente no encontrado para la sucursal' }) 
           : res.status(200).json(clientesEncontrado);
     }
@@ -62,9 +69,14 @@ const getClientesBySucursal = async (req: Request, res: Response) => {
 //actualizar un cliente
 const updateCliente = async (req: Request, res: Response) => {
     try {
+        //validar que la ruta exista
+        const rutaCliente = await ruta.getRutaById(req.body.id_ruta);
+        if (!rutaCliente) {
+            return res.status(400).send({ error: 'La ruta especificada no existe' });
+        }
+
         const id = parseInt(req.params.id);
         const clienteActualizado = await cliente.updateCliente(id, req.body);
-        
         return clienteActualizado===null
         ? res.status(404).send({ message: 'Cliente no encontrado o no se pudo actualizar' }) 
         : res.status(200).json(clienteActualizado);
