@@ -61,14 +61,15 @@ export async function getClientesBySucursal(sucursal_id: number): Promise<Client
 // Actualizar un cliente
 export async function updateCliente(id: number, cliente: Cliente): Promise<Cliente|null> {
   const updatedCliente = await db.query(
-    `UPDATE clientes SET nombres=$1, apellidos=$2, numero_identificacion=$3, telefono=$4, direccion=$5, estado=$6 WHERE cliente_id=$7 RETURNING *`,
+    `UPDATE clientes SET nombres=$1, apellidos=$2, numero_identificacion=$3, telefono=$4, direccion=$5, estado=$6, id_ruta=$7 WHERE cliente_id=$8 RETURNING *`,
     [
       cliente.nombres,  
       cliente.apellidos,
       cliente.numero_identificacion || null,
       cliente.telefono || null,
       cliente.direccion,
-      cliente.estado,
+      cliente.estado||'activo',
+      cliente.id_ruta,
       id
     ]
   );
