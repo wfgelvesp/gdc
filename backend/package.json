@@ -5,11 +5,12 @@
   "license": "ISC",
   "author": "wfgelvesp",
   "type": "commonjs",
-   "main": "dist/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "nodemon --exec ts-node index.ts",
     "build": "tsc",
-    "dev": "ts-node index.ts"
+    "dev": "ts-node index.ts",
+    "start:prod": "node dist/index.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
