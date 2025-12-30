@@ -37,7 +37,7 @@ export async function getSucursales(): Promise<Sucursal[]> {
 export async function createSucursal(sucursal: Sucursal): Promise<Sucursal> {
   const newSucursal=await db.query(
     `INSERT INTO sucursales (nombre, direccion, telefono, fecha_creacion, estado)
-     VALUES ($1, $2, $3, $4, $5)`,
+     VALUES ($1, $2, $3, $4, $5)  RETURNING *`,
     [
       sucursal.nombre,
       sucursal.direccion,
@@ -51,9 +51,9 @@ export async function createSucursal(sucursal: Sucursal): Promise<Sucursal> {
 }
 
 // Actualizar una sucursal
-export async function updateSucursal(id: number, sucursal: Partial<Sucursal>): Promise<Sucursal> {
+export async function updateSucursal(id: number, sucursal: Partial<Sucursal>): Promise<Sucursal|null> {
  const res=await db.query(
-    `UPDATE sucursales SET nombre=$1, direccion=$2, telefono=$3, estado=$4 WHERE sucursal_id=$5`,
+    `UPDATE sucursales SET nombre=$1, direccion=$2, telefono=$3, estado=$4 WHERE sucursal_id=$5  RETURNING *`,
     [
       sucursal.nombre,
       sucursal.direccion,
@@ -63,13 +63,13 @@ export async function updateSucursal(id: number, sucursal: Partial<Sucursal>): P
     ]
   );
 
-    return res.rows[0];
+    return res.rows[0] ||null;
 }
 
 // Eliminar una sucursal
 export async function deleteSucursal(id: number): Promise<void> {
   await db.query(
-    `DELETE FROM sucursales WHERE sucursal_id=$1`,
+    `DELETE FROM sucursales WHERE sucursal_id=$1  RETURNING *`,
     [id]
   );
 }
