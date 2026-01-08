@@ -66,6 +66,25 @@ const getClientesBySucursal = async (req: Request, res: Response) => {
     }   
 };
 
+//listar clientes por ruta
+const getClientesByRuta = async (req: Request, res: Response) => {
+    try { 
+        const existeRuta = await ruta.getRutaById(parseInt(req.params.id_ruta));
+        if (!existeRuta) {
+            return res.status(400).send({ error: 'La ruta especificada no existe' });
+        }
+
+        const id_ruta = parseInt(req.params.id_ruta);
+        const clientesEncontrado = await cliente.getClientesByRuta(id_ruta);
+          return clientesEncontrado.length===0
+          ? res.status(404).send({ message: 'Cliente no encontrado para la ruta' }) 
+          : res.status(200).json(clientesEncontrado);
+    }
+        catch (error) {
+        return res.status(500).send({ error: 'Error al obtener el cliente' });
+    }
+};
+
 //actualizar un cliente
 const updateCliente = async (req: Request, res: Response) => {
     try {
@@ -98,11 +117,15 @@ const deleteCliente = async (req: Request, res: Response) => {
     }
 };
 
+//asiganar ruta
+
+
 export default{
     createCliente,
     getClientes,
     getClienteById,
     getClientesBySucursal,
+    getClientesByRuta,
     updateCliente,
     deleteCliente
 }

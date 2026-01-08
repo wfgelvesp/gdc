@@ -58,6 +58,12 @@ export async function getClientesBySucursal(sucursal_id: number): Promise<Client
   return result.rows;
 }
 
+export async function getClientesByRuta(id_ruta: number): Promise<Cliente[]> {
+  const result = await db.query('SELECT * FROM clientes WHERE id_ruta = $1',
+    [id_ruta]);
+  return result.rows;
+}
+
 // Actualizar un cliente
 export async function updateCliente(id: number, cliente: Cliente): Promise<Cliente|null> {
   const updatedCliente = await db.query(
@@ -89,6 +95,7 @@ export default{
   getClientes,
   getClienteById,
   getClientesBySucursal,
+  getClientesByRuta,
   updateCliente,
   deleteCliente
 };

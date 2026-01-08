@@ -28,7 +28,7 @@ export async function createPeriodo(periodo:Periodo): Promise<Periodo|null> {
         periodo.fecha_fin ,
         periodo.capital_inicial,
         periodo.estado || 'en curso',
-        periodo.created_at || new Date().toISOString() 
+        periodo.created_at || new Date().toISOString() .slice(0, 10),
     ]
   );
   return newPeriodo.rows[0]||null;

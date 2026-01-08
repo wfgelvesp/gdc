@@ -26,7 +26,21 @@ export const getTiposPrestamo = async (req: Request, res: Response): Promise<Res
     :res.status(200).json(tiposPrestamo);
   }
     catch (error) {
-    return res.status(500).json({ error: 'Error al obtener los tipos de préstamo' });
+    return res.status(500).send({ error: 'Error al obtener los tipos de préstamo' });
+  }
+};
+
+//obtener tipo de prestamo por id
+export const getTipoPrestamoById = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const id = parseInt(req.params.id);
+    const tipoPrestamo = await TipoPrestamo.getTipoPrestamoById(id);
+    if (tipoPrestamo.length === 0) {
+      return res.status(404).send({ error: 'Tipo de préstamo no encontrado' });
+    }
+    return res.status(200).json(tipoPrestamo[0]);
+  } catch (error) {
+    return res.status(500).json({ error: 'Error al obtener el tipo de préstamo' });
   }
 };
 
@@ -37,11 +51,11 @@ export const updateTipoPrestamo = async (req: Request, res: Response): Promise<R
     const tipoPrestamo = req.body;
     const updatedTipoPrestamo = await TipoPrestamo.updateTipoPrestamo(id, tipoPrestamo);
     if (!updatedTipoPrestamo) {
-        return res.status(404).json({ error: 'Tipo de préstamo no encontrado' });
+        return res.status(404).send({ error: 'Tipo de préstamo no encontrado' });
     }
-    return res.status(200).json(updatedTipoPrestamo);
+    return res.status(200).send(updatedTipoPrestamo);
   } catch (error) {
-    return res.status(500).json({ error: 'Error al actualizar el tipo de préstamo' });
+    return res.status(500).send({ error: 'Error al actualizar el tipo de préstamo' });
   } 
 };
 
@@ -51,17 +65,18 @@ export const deleteTipoPrestamo = async (req: Request, res: Response): Promise<R
     const id = parseInt(req.params.id); 
     const deletedTipoPrestamo = await TipoPrestamo.deleteTipoPrestamo(id);  
     if (!deletedTipoPrestamo) {
-      return res.status(404).json({ error: 'Tipo de préstamo no encontrado' });
+      return res.status(404).send({ error: 'Tipo de préstamo no encontrado' });
     }
-    return res.status(200).json(deletedTipoPrestamo);
+    return res.status(200).send({ message: 'Tipo de préstamo eliminado exitosamente' });
     } catch (error) {       
-    return res.status(500).json({ error: 'Error al eliminar el tipo de préstamo' });
+    return res.status(500).send({ error: 'Error al eliminar el tipo de préstamo' });
   }
 };
 
 export default {
   createTipoPrestamo,
   getTiposPrestamo,
+  getTipoPrestamoById,
   updateTipoPrestamo,
   deleteTipoPrestamo
 };

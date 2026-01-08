@@ -3,9 +3,9 @@ import express from "express";
 const router = express.Router();
 
 // Ruta para crear un nuevo tipo de préstamo
-router.post("/TipoPrestamo", TipoPrestamo.createTipoPrestamo);
-router.get("/TipoPrestamo", TipoPrestamo.getTiposPrestamo);
-router.put("/TipoPrestamo/:id", TipoPrestamo.updateTipoPrestamo);
-router.delete("/TipoPrestamo/:id", TipoPrestamo.deleteTipoPrestamo);
+router.post("/createTipoPrestamo", TipoPrestamo.createTipoPrestamo);
+router.get("/getTipoPrestamo", TipoPrestamo.getTiposPrestamo);
+router.put("/updateTipoPrestamo/:id", TipoPrestamo.updateTipoPrestamo);
+router.delete("/deleteTipoPrestamo/:id", TipoPrestamo.deleteTipoPrestamo);
 
 export default router;

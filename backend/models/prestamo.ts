@@ -6,24 +6,38 @@ export interface Prestamo {
   cliente_id: number;
   periodo_id: number;
   monto_prestamo: number;
-  fecha_desembolso: Date;
-  estado_prestamo_id: number;
+  fecha_desembolso?: Date;
+  estado_prestamo?: string;
   saldo_pendiente?: number;
   created_at?: Date;
   tipo_prestamo_id: number;
+  valor_intereses: number;
+  valor_cuota?: number;
 }
 
 export const createPrestamo = async (prestamo: Prestamo): Promise<Prestamo| null> => {
   const result = await db.query(
-    `INSERT INTO prestamos (cliente_id, periodo_id, monto_prestamo, fecha_desembolso, estado_prestamo_id, saldo_pendiente, tipo_prestamo_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    `INSERT INTO prestamos (cliente_id, 
+                            periodo_id, 
+                            monto_prestamo, 
+                            fecha_desembolso, 
+                            estado_prestamo, 
+                            saldo_pendiente,
+                            created_at, 
+                            tipo_prestamo_id, 
+                            valor_intereses, 
+                            valor_cuota ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
     [
       prestamo.cliente_id,
       prestamo.periodo_id,  
       prestamo.monto_prestamo,
-      prestamo.fecha_desembolso,
-      prestamo.estado_prestamo_id,
+      prestamo.fecha_desembolso|| new Date().toISOString().slice(0, 10),
+      prestamo.estado_prestamo||'en curso',
       prestamo.saldo_pendiente || prestamo.monto_prestamo,
+      prestamo.created_at || new Date().toISOString().slice(0, 10),
       prestamo.tipo_prestamo_id,
+      prestamo.valor_intereses,
+      prestamo.valor_cuota,
     ]
   );
   return result.rows[0];
@@ -50,7 +64,7 @@ export const updatePrestamo = async (prestamo_id: number, prestamo: Prestamo): P
       prestamo.periodo_id,
       prestamo.monto_prestamo,  
       prestamo.fecha_desembolso,
-      prestamo.estado_prestamo_id,
+      prestamo.estado_prestamo,
       prestamo.saldo_pendiente,
       prestamo.tipo_prestamo_id,
       prestamo_id,

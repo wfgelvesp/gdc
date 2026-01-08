@@ -23,6 +23,10 @@ export const getTiposPrestamo = async (): Promise<TipoPrestamo[]> => {
   const result = await db.query('SELECT * FROM tipo_prestamo');
   return result.rows;
 };
+
+
+
+
 // Eliminar tipo de préstamo
 export const deleteTipoPrestamo = async (id: number): Promise<TipoPrestamo | null> => {
   const deletedTipoPrestamo = await db.query(
@@ -46,9 +50,9 @@ export const updateTipoPrestamo = async (id: number, tipoPrestamo: TipoPrestamo)
 };
 
 //buscar tipo de prestamo por id
-export const getTipoPrestamoById = async (id: number): Promise<TipoPrestamo | null> => {
+export const getTipoPrestamoById = async (id: number): Promise<TipoPrestamo[]> => {
   const result = await db.query('SELECT * FROM tipo_prestamo WHERE id_tipo_prestamo = $1', [id]);
-  return result.rows[0] || null;
+  return result.rows;
 };
 
 export default {
