@@ -4,12 +4,24 @@ import { Request, Response } from "express";
 // Crear asignación de ruta
 export const createAsignacionRuta = async (req: Request, res: Response): Promise<Response> => {
   try {
+     
+    const existeRutaAsignada = await AsignacionRuta.isRutaAsignada(req.body.ruta_id, req.body.usuario_id);
+   
+    if (existeRutaAsignada) {
+      return res.status(400).json({ error: 'La ruta ya está asignada a este usuario' });
+    }
+
+    //desactivar asignaciones previas del usuario y la ruta
+    const desactivarAsignacion = await AsignacionRuta.desactivarAsignacionRuta(req.body.usuario_id,req.body.ruta_id);
+    
+
     const asignacionRuta = req.body;
     const newAsignacionRuta = await AsignacionRuta.createAsignacionRuta(asignacionRuta);
     return (!newAsignacionRuta) 
     ? res.status(500).send({ error: 'No se pudo crear la asignación de ruta' }) 
     : res.status(201).json(newAsignacionRuta);
   } catch (error) {
+    console.error(error);
     return res.status(500).send({ error: 'Error al crear la asignación de ruta' });
   }
 };
