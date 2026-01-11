@@ -14,8 +14,8 @@ export const createUsuario = async (req: Request, res: Response) => {
     }
    const newUsuario= await usuario.createUsuario(req.body);
   return (!newUsuario )
-    ? res.status(201).send({ message: 'Usuario creado exitosamente' })
-    : res.status(400).send({ error: 'El usuario no pudo ser creado' });
+    ? res.status(400).send({ error: 'El usuario no pudo ser creado' })
+    : res.status(201).send({ message: 'Usuario creado exitosamente' }) ;
   } catch (error) {
     res.status(500).send({ error: 'Error al crear el usuario' });
   }
