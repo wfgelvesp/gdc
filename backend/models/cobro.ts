@@ -4,7 +4,7 @@ export interface Cobro {
   cobro_id?: number;
   prestamo_id: number;
   usuario_id: number;
-  fecha_cobro: Date;
+  fecha_cobro?: Date;
   monto_cobrado: number;
   estado: string;
   created_at?: Date;
@@ -17,9 +17,9 @@ export const createCobro = async (cobro: Cobro): Promise<Cobro | null> => {
     [
       cobro.prestamo_id,
       cobro.usuario_id,
-      cobro.fecha_cobro,
+      cobro.fecha_cobro || new Date().toISOString().slice(0, 10),
       cobro.monto_cobrado,
-      cobro.estado,
+      cobro.estado || 'pendiente',
     ]
   );
   return result.rows[0] || null;

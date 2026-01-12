@@ -63,6 +63,23 @@ export async function getClientesByRuta(id_ruta: number): Promise<Cliente[]> {
     [id_ruta]);
   return result.rows;
 }
+//
+// 
+//listar clientes por ruta con idUsuario
+export async function getClientesByUser(id_usuario: number): Promise<Cliente[]|any[]> {
+  const result = await db.query(`SELECT clientes.Nombres ||' '||  clientes.Apellidos AS nombreCliente,
+    case when prestamos.prestamo_id is null then 'Cliente no tiene prestamos activos' else lpad(cast(prestamos.prestamo_id as text), 8, '0' ) end AS idPrestamo, 
+    clientes.direccion AS direccionCliente,
+    clientes.telefono AS telefonoCliente
+    FROM asignaciones_rutas ar
+    inner JOIN rutas ON ar.ruta_id = rutas.ruta_id
+    inner JOIN clientes  ON rutas.ruta_id = clientes.id_ruta
+    left join prestamos on clientes.cliente_id = prestamos.cliente_id
+    WHERE ar.usuario_id = $1 and ar.estado = 'activa' `,
+    [id_usuario]);
+ 
+  return result.rows;
+}
 
 // Actualizar un cliente
 export async function updateCliente(id: number, cliente: Cliente): Promise<Cliente|null> {
@@ -96,6 +113,7 @@ export default{
   getClienteById,
   getClientesBySucursal,
   getClientesByRuta,
+  getClientesByUser,
   updateCliente,
   deleteCliente
 };

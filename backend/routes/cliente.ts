@@ -8,6 +8,7 @@ router.get('/getClientes', cliente.getClientes);
 router.get('/getClienteById/:id', cliente.getClienteById);
 router.get('/getClientesBySucursal/:sucursal_id', cliente.getClientesBySucursal);
 router.get('/getClientesByRuta/:id_ruta', cliente.getClientesByRuta);router.put('/updateCliente/:id', cliente.updateCliente);
+router.get('/getClientesByUser/:id_usuario', cliente.getClientesByUser);
 router.delete('/deleteCliente/:id', cliente.deleteCliente);
 
 

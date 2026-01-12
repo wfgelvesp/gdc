@@ -9,6 +9,7 @@ export const createCobro = async (req: Request, res: Response): Promise<Response
     ? res.status(400).send({ error: 'No se pudo crear el cobro' }) 
     : res.status(201).json(newCobro);
   } catch (error) {
+     console.log(error);
     return res.status(500).json({ error: 'Error al crear el cobro' });
   }
 };
@@ -21,6 +22,7 @@ export const getAllCobros = async (req: Request, res: Response): Promise<Respons
     ? res.status(404).send({ error: 'No existen cobros creados' }) 
     : res.status(200).json(cobros);
   } catch (error) {
+   
     return res.status(500).json({ error: 'Error al obtener los cobros' });
   }
 };

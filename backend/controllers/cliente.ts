@@ -1,6 +1,8 @@
 import  cliente  from "../models/cliente";
 import ruta from "../models/ruta";
+import usuario from "../models/usuario";
 import { Request, Response } from "express";
+
 
 //crear un nuevo cliente
 const createCliente =async (req: Request, res: Response) => {
@@ -69,6 +71,8 @@ const getClientesBySucursal = async (req: Request, res: Response) => {
 //listar clientes por ruta
 const getClientesByRuta = async (req: Request, res: Response) => {
     try { 
+
+
         const existeRuta = await ruta.getRutaById(parseInt(req.params.id_ruta));
         if (!existeRuta) {
             return res.status(400).send({ error: 'La ruta especificada no existe' });
@@ -79,6 +83,26 @@ const getClientesByRuta = async (req: Request, res: Response) => {
           return clientesEncontrado.length===0
           ? res.status(404).send({ message: 'Cliente no encontrado para la ruta' }) 
           : res.status(200).json(clientesEncontrado);
+    }
+        catch (error) {
+        return res.status(500).send({ error: 'Error al obtener el cliente' });
+    }
+};
+
+//listar clientes por ruta con idUsuario desde params
+const getClientesByUser = async (req: Request, res: Response) => {
+    try { 
+       
+        const id_usuario = parseInt(req.params.id_usuario);
+        const existeUsuario = await usuario.getUsuarioById(id_usuario);
+        if (!existeUsuario) {
+            return res.status(400).send({ error: 'El cobrador especificado no existe' });
+        }
+
+        const clientesEncontrado = await cliente.getClientesByUser(id_usuario);
+          return clientesEncontrado.length===0
+            ? res.status(404).send({ message: 'Cobrador no tiene asignada ruta o la Ruta no tiene clientes' })
+            : res.status(200).json(clientesEncontrado);
     }
         catch (error) {
         return res.status(500).send({ error: 'Error al obtener el cliente' });
@@ -126,6 +150,7 @@ export default{
     getClienteById,
     getClientesBySucursal,
     getClientesByRuta,
+    getClientesByUser,
     updateCliente,
     deleteCliente
 }
