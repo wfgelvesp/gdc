@@ -488,7 +488,74 @@ export const buscarPrestamoById = async (prestamo_id: number): Promise<Prestamo 
   return result.rows[0] || null;
 };
 
+//Obtener el capital prestado por una sucursal
+export const getCapitalEnCalle = async (sucursal_id: number): Promise<number> => {
+  const result = await db.query(
+    `SELECT SUM(saldo_pendiente) AS capital_en_calle
+     FROM prestamos
+     WHERE sucursal_id = $1 AND estado_prestamo = 'en curso'`,
+    [sucursal_id]
+  );
+  return result.rows[0].capital_en_calle || 0;
+};
 
+//Obtener los interes proyectados por una sucursal
+export const getInteresesProyectados = async (sucursal_id: number): Promise<number> => {
+  const result = await db.query(
+    `
+    SELECT 
+   sucursal,
+    SUM(intereses_proyectados) AS intereses_proyectados_totales
+from 
+(SELECT 
+    p.sucursal_id as sucursal,
+    p.prestamo_id,    
+    case when tp.cantidad_cuotas>COUNT(c.cobro_id) then
+    (tp.cantidad_cuotas - COUNT(c.cobro_id)) * (p.valor_intereses / tp.cantidad_cuotas) 
+    else
+    0
+    end  AS intereses_proyectados    
+FROM prestamos p
+INNER JOIN tipo_prestamo tp ON tp.id_tipo_prestamo = p.tipo_prestamo_id
+LEFT JOIN cobros c ON c.prestamo_id = p.prestamo_id
+WHERE p.sucursal_id = $1 
+  AND p.estado_prestamo = 'en curso'
+GROUP BY 
+    p.prestamo_id, 
+    p.monto_prestamo, 
+    p.saldo_pendiente, 
+    p.valor_intereses,
+    tp.porcentaje, 
+    tp.cantidad_cuotas
+
+) as tb_intereses
+GROUP BY tb_intereses.sucursal
+    `,
+    [sucursal_id]
+  );
+  return result.rows[0].intereses_proyectados_totales || 0;
+};
+
+//Desglose de prestamos
+export const getDesglosePrestamos = async (sucursal_id:number): Promise<Prestamo[]> => {
+  const result = await db.query(`
+    SELECT
+      p.prestamo_id,
+      p.monto_prestamo,   
+      p.saldo_pendiente,      
+      p.estado_prestamo,
+      p.sucursal_id,      
+      c.nombres  ||' '||
+      c.apellidos AS  nombre     
+      FROM prestamos p
+      INNER JOIN clientes c ON p.cliente_id = c.cliente_id
+      where p.sucursal_id = $1 and p.estado_prestamo = 'en curso'
+      ORDER BY c.cliente_id ,p.prestamo_id asc
+    `,
+    [sucursal_id]
+  );
+  return result.rows;
+};
 
  export default{
   createPrestamo,
@@ -500,6 +567,9 @@ export const buscarPrestamoById = async (prestamo_id: number): Promise<Prestamo 
   getPrestamoInfoById,
   getTotalCarteraSucursal,
   getPrestamosEnCursoSucursal,
+  getCapitalEnCalle,
+  getInteresesProyectados,
+  getDesglosePrestamos,
   updatePrestamo,
   confirmarPrestamo,
   deletePrestamo,
