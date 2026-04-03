@@ -31,14 +31,19 @@ export const createCobro = async (req: Request, res: Response): Promise<Response
       return res.status(404).send({ error: 'Cobrador no encontrado' });
     }
     
+    
     //validar que la fecha de la caja diaria en curso sea igual al día del cobro
     const cajaDiaria = await CajaDiaria.getCajasDiariasByUsuario(req.body.usuario_id);
+     
     if (!cajaDiaria || cajaDiaria.length === 0 || !cajaDiaria[0].fecha_apertura) {
       return res.status(404).send({ error: 'No hay caja diaria abierta para este cobrador' });
     }
-    const fechaCaja = new Date(cajaDiaria[0].fecha_apertura).toISOString().split('T')[0];
-    const fechaCobro = new Date(req.body.fecha_cobro).toISOString().split('T')[0];
-    if (fechaCaja !== fechaCobro) {
+   
+    const  fechaCaja = cajaDiaria[0].fecha_apertura;    
+    const fechaCobro= new Date();
+   
+    
+    if (fechaCaja.toISOString().split('T')[0] !== fechaCobro.toISOString().split('T')[0]) {
       return res.status(400).send({ error: 'La fecha del cobro no coincide con la fecha de la caja diaria' });
     }
 
@@ -69,6 +74,7 @@ if(!prestamoExistente.saldo_pendiente || prestamoExistente.saldo_pendiente <= 0)
     ? res.status(400).send({ error: 'No se pudo crear el cobro' }) 
     : res.status(201).json(newCobro);
   } catch (error) {
+  console.log(error);
   
     return res.status(500).json({ error: 'Error al crear el cobro' });
   }
@@ -237,6 +243,19 @@ export const getCantCobrosHoy = async (req: Request, res: Response): Promise<Res
   }
 };
 
+export const getSumatoriaCobrosSucursal = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const sucursal_id = parseInt(req.params.sucursal_id);
+    const sumatoriaCobros = await cobro.getSumatoriaCobrosSucursal(sucursal_id);
+    if (sumatoriaCobros === null || sumatoriaCobros === undefined) {
+      return res.status(404).send({ error: 'No se encontraron cobros para la sucursal especificada' });
+    }
+    return res.status(200).json({'sumatoria_cobros_sucursal': sumatoriaCobros});
+  } catch (error) {
+    return res.status(500).send({ error: 'Error al obtener la sumatoria de cobros de la sucursal' });
+  }
+};
+
 // Actualizar un cobro
 export const updateCobro = async (req: Request, res: Response): Promise<Response> => {
   try {
@@ -320,11 +339,15 @@ export const validarMultiplesCobros = async (req: Request, res: Response): Promi
 
 const resumenCobrosCoradorRuta = async (req: Request, res: Response): Promise<Response> => {
   try {
+   
+    
     const  sucursal_id  = parseInt(req.params.sucursal_id);
         
     const existeSucursal = await sucursal.getSucursalById(sucursal_id);
+   
+    
     if (!existeSucursal || existeSucursal === null) {
-      return res.status(404).send({ error: 'No se encontraron rutas para la sucursal especificada' });
+     return res.status(404).send({ error: 'No se encontraron rutas para la sucursal especificada' });
     }
 
     const resultado = await cobro.resumenCobrosCoradorRuta(sucursal_id,new Date().toISOString().split('T')[0]);
@@ -336,6 +359,8 @@ if (!resultado || resultado.length === 0) {
     return res.status(500).send({ error: 'Error al obtener el resumen de cobros por corador y ruta' });
   }
 };
+
+
 
 // Función para sumar días hábiles a una fecha de prestamo
 function calcularPlanDePagos(fechaInicio: Date, fechaFin: Date,cobrosHistory:any[]):any[] {
@@ -383,6 +408,7 @@ export default {
   getCobroInfoById,
   getTotalCobradoHoy,
   getCantCobrosHoy,
+  getSumatoriaCobrosSucursal,
   updateCobro,
   updateMontoCobroConCaja,
   deleteCobro,

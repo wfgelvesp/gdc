@@ -42,7 +42,79 @@ return res.status(201).json(newCajaSucursal);
   }
 };
 
+export const cajaInicialSucursal = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const idsucursal=parseInt(req.params.sucursal_id);
+    const saldoInicial = await CajaSucursal.cajaInicialSucursal(idsucursal);
+    if (!saldoInicial) {
+      return res.status(404).send({ message: "No se encontró el saldo inicial de la caja de sucursal" });
+    }
+    return res.status(200).json(saldoInicial);
+  } catch (error) {
+    console.log(error);
+    
+    return res.status(500).send({ message: "Error al obtener el saldo inicial de la caja de sucursal" });
+  }
+};
+
+export const getGastosSucursal = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const idsucursal=parseInt(req.params.sucursal_id);
+  
+    
+    const gastos = await CajaSucursal.getGastosSucursal(idsucursal);
+    if (!gastos || gastos === undefined) {
+      return res.status(404).send({ message: "No se encontraron gastos para la caja de sucursal" });
+    }
+    return res.status(200).json({ gastos_sucursal: gastos });
+  } catch (error) {
+    //console.log(error);
+    
+    return res.status(500).send({ message: "Error al obtener los gastos de la caja de sucursal" });
+  }
+};
+
+export const getSumPrestamosSucursal = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const idsucursal=parseInt(req.params.sucursal_id);  
+    const gastos = await CajaSucursal.getSumPrestamosSucursal(idsucursal);
+    if (gastos === undefined) {
+      return res.status(404).send({ message: "No se encontraron préstamos para la caja de sucursal" });
+    } 
+    return res.status(200).json({ prestamos_sucursal: gastos });
+  } catch (error) {
+    //console.log(error);
+
+    return res.status(500).send({ message: "Error al obtener los préstamos de la caja de sucursal" });
+  }
+};
+
+export const getReporteGastosSucursal = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const idsucursal=parseInt(req.params.sucursal_id);
+    if (isNaN(idsucursal)) {
+      return res.status(400).send({ message: "ID de sucursal no válido" });
+    }
+    const reporteGastos = await CajaSucursal.getReporteGastosSucursal(idsucursal);
+    if (!reporteGastos ) {
+      return res.status(404).send({ message: "No se encontraron gastos para la caja de sucursal" });
+    }
+    return res.status(200).json({ gastos: Number(reporteGastos.gastos) || 0,
+      total_prestamos: Number(reporteGastos.total_prestamos) || 0,
+      total_reembolsos: Number(reporteGastos.total_reembolsos) || 0 });
+  } catch (error) {
+    
+    return res.status(500).send({ message: "Error al obtener el reporte de gastos de la caja de sucursal" });
+  }
+};
+
+
+
 export default {
   createCajaSucursal,
   getAllCajasSucursal,
+  cajaInicialSucursal,
+  getGastosSucursal,
+  getSumPrestamosSucursal,
+  getReporteGastosSucursal
 };
