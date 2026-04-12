@@ -38,7 +38,7 @@ export const createMovimientoCajaSucursal = async (movimiento: MovimientoCajaSuc
             movimiento.tipo_movimiento ,
             movimiento.monto,
             movimiento.descripcion,
-            movimiento.fecha_movimiento || new Date().toISOString(),
+            movimiento.fecha_movimiento || new Date().toLocaleString('en-CA', {     timeZone: 'America/Mexico_City',    hour12: false }).replace(',', ''),
             movimiento.estado_movto || 'confirmado'
         ]);
 
@@ -49,10 +49,11 @@ export const createMovimientoCajaSucursal = async (movimiento: MovimientoCajaSuc
         // 2. Actualizar Saldo Caja
         const updatecaja = await client.query(`UPDATE cajas_sucursales 
             SET saldo_actual = saldo_actual + $2, 
-            fecha_ultima_actualizacion = NOW() 
+            fecha_ultima_actualizacion = $3 
             WHERE caja_sucursal_id = $1 RETURNING *`,
         [movimiento.caja_sucursal_id,
             movimiento.tipo_movimiento === 'ingreso' ? movimiento.monto : -movimiento.monto,
+            new Date().toLocaleString('en-CA', { timeZone: 'America/Mexico_City', hour12: false }).replace(',', '')
         ]);
        
         await client.query('COMMIT');
@@ -81,10 +82,11 @@ export const getMovimientosByCajaSucursalId = async (caja_sucursal_id: number, f
     const result = await db.query(
         `SELECT * FROM movimientos_caja_sucursal
         WHERE caja_sucursal_id = $1
-        and fecha_movimiento between $2 and $3
+        and date(fecha_movimiento) between $2 and $3
         ORDER BY fecha_movimiento DESC`,
         [caja_sucursal_id, fechaInicial, fechaFinal]
     );
+  
     
     
     return result.rows;
@@ -109,10 +111,11 @@ export const anularMovimientoCajaSucursal = async (movimiento_id: number): Promi
     // 2. Actualizar Saldo Caja
         const updatecaja = await client.query(`UPDATE cajas_sucursales 
             SET saldo_actual = saldo_actual + $2, 
-            fecha_ultima_actualizacion = NOW() 
+            fecha_ultima_actualizacion = $3 
             WHERE caja_sucursal_id = $1  RETURNING *`,
         [result.rows[0].caja_sucursal_id,
             result.rows[0].tipo_movimiento === 'ingreso' ? -result.rows[0].monto : result.rows[0].monto,
+            new Date().toLocaleString('en-CA', {    timeZone: 'America/Mexico_City',    hour12: false}).replace(',', '')
         ]);
 
         if (!updatecaja.rows[0]) {
